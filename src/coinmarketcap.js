@@ -21,19 +21,27 @@ var getTickers = function(callback) {
     get(TICKER_URL, handler);
 };
 
+var checkArgs = function(functionName, currency, callback) {
+    if (!callback) {
+        throw Error(functionName + ': Missing callback');
+    }
+    if (currency && !CURRENCIES.includes(currency)) {
+        throw Error(functionName + ': currency not recognized ' + currency + ', only available: ' + CURRENCIES);
+    }
+};
+
+var addCurrency = function(currency) {
+    return (currency? ('?convert=' + currency) : '');
+};
+
 var getTicker = function(tickerId, currency, callback) {
     if (!callback) {
         callback = currency;
         currency = null;
     }
-    if (!callback) {
-        throw Error('getTicker(): Missing callback');
-    }
-    if (currency && !CURRENCIES.includes(currency)) {
-        throw Error('getTicker(): currency not recognized ' + currency + ', only available: ' + CURRENCIES);
-    }
+    checkArgs('getTicker()', currency, callback);
 
-    const tickerUrl = TICKER_URL + tickerId + '/' + (currency? ('?convert=' + currency) : '');
+    const tickerUrl = TICKER_URL + tickerId + '/' + addCurrency(currency);
 
     var handler = getCoinMarketHandler(callback);
     get(tickerUrl, handler);
@@ -44,14 +52,9 @@ var getGlobalMarketData = function(currency, callback) {
         callback = currency;
         currency = null;
     }
-    if (!callback) {
-        throw Error('getTicker(): Missing callback');
-    }
-    if (currency && !CURRENCIES.includes(currency)) {
-        throw Error('getTicker(): currency not recognized ' + currency + ', only available: ' + CURRENCIES);
-    }
+    checkArgs('getGlobalMarketData()', currency, callback);
 
-    const globalUrl = GLOBAL_URL + (currency? ('?convert=' + currency) : '');
+    const globalUrl = GLOBAL_URL + addCurrency(currency);
 
     var handler = getCoinMarketHandler(callback);
     get(globalUrl, handler);
